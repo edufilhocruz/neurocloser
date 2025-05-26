@@ -62,22 +62,21 @@ Tecnologias principais:
 
 ## 🚀 Funcionalidades 
 
-	•	✅ Ingestão de dados da Receita Federal (CSV → SQLite → PostgreSQL)
-	•	✅ API para filtragem de empresas por ICP
-	•	✅ Dashboard com estatísticas de empresas (ativas, com e-mail, com telefone, etc.)
-	•	🔄 Integração com CRM Twenty
-	•	🔄 Ligações automáticas com gravação e TTS
-	•	🔄 IA para prospecção ativa e resposta de leads
-	•	🔄 IA para análise de reuniões com closers humanos
+✅ Ingestão de dados da Receita Federal (CSV → SQLite → PostgreSQL)
+✅ API para filtragem de empresas por ICP
+✅ Dashboard com estatísticas de empresas (ativas, com e-mail, com telefone, etc.)
+🔄 Integração com CRM Twenty
+🔄 Ligações automáticas com gravação e TTS
+🔄 IA para prospecção ativa e resposta de leads
+🔄 IA para análise de reuniões com closers humanos
 
 ## 🧪 Como Rodar o Projeto Localmente
 
-Requisitos
-	•	Docker + Docker Compose
-	•	Node.js (v22+)
-	•	pnpm (npm install -g pnpm)
-	•	Python 3.10+
-	•	PostgreSQL 16+
+✅ Docker + Docker Compose
+✅ Node.js (v22+)
+✅ pnpm (npm install -g pnpm)
+✅ Python 3.10+
+✅ PostgreSQL 16+
 
 ## 🧪 Passos
 
@@ -107,7 +106,7 @@ worker-call-monitor - Analisa reuniões com closers e sugere ações
 
 ## 🛠️ Em desenvolvimento
 
-	•	🔧 ICP dinâmico com regras personalizadas
-	•	🔧 Integração com LLaMA local
-	•	🔧 Deploy automatizado via K3s e Portainer
-	•	🔧 Dashboard de performance de campanhas
+🔧 ICP dinâmico com regras personalizadas
+🔧 Integração com LLaMA local
+🔧 Deploy automatizado via K3s e Portainer
+🔧 Dashboard de performance de campanhas
