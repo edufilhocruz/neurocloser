@@ -57,7 +57,6 @@ Tecnologias principais:
 ├── tsconfig.base.json     # Configuração base TypeScript
 ├── .eslintrc.js           # Lint global
 └── .prettierrc            # Formatação de código
-</pre>
 
 
 ## 🚀 Funcionalidades 
@@ -77,6 +76,7 @@ Tecnologias principais:
 ✅ pnpm (npm install -g pnpm)
 ✅ Python 3.10+
 ✅ PostgreSQL 16+
+</pre>
 
 ## 🧪 Passos
 
