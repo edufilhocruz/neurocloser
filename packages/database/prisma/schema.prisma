@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Cnae {
+  codigo    String @id
+  descricao String?
+
+  @@index([codigo], name: "idx_cnae")
+  @@map("cnae")
+}
+
+model Motivo {
+  codigo    String @id
+  descricao String?
+
+  @@index([codigo], name: "idx_motivo")
+  @@map("motivo")
+}
+
+model Municipio {
+  codigo    String @id
+  descricao String?
+
+  @@index([codigo], name: "idx_municipio")
+  @@map("municipio")
+}
+
+model NaturezaJuridica {
+  codigo    String @id
+  descricao String?
+
+  @@index([codigo], name: "idx_natureza_juridica")
+  @@map("natureza_juridica")
+}
+
+model Pais {
+  codigo    String @id
+  descricao String?
+
+  @@index([codigo], name: "idx_pais")
+  @@map("pais")
+}
+
+model QualificacaoSocio {
+  codigo    String @id
+  descricao String?
+
+  @@index([codigo], name: "idx_qualificacao_socio")
+  @@map("qualificacao_socio")
+}
+
+model Empresa {
+  cnpj_basico               String   @id
+  razao_social              String?
+  natureza_juridica         String?
+  qualificacao_responsavel  String?
+  porte_empresa             String?
+  ente_federativo_responsavel String?
+  capital_social            Float?
+
+  @@index([cnpj_basico], name: "idx_empresas_cnpj_basico")
+  @@index([razao_social], name: "idx_empresas_razao_social")
+  @@map("empresas")
+}
+
+model Estabelecimento {
+  cnpj_basico             String
+  cnpj_ordem              String
+  cnpj_dv                 String
+  matriz_filial           String?
+  nome_fantasia           String?
+  situacao_cadastral      String?
+  data_situacao_cadastral String?
+  motivo_situacao_cadastral String?
+  nome_cidade_exterior    String?
+  pais                    String?
+  data_inicio_atividades  String?
+  cnae_fiscal             String?
+  cnae_fiscal_secundaria  String?
+  tipo_logradouro         String?
+  logradouro              String?
+  numero                  String?
+  complemento             String?
+  bairro                  String?
+  cep                     String?
+  uf                      String?
+  municipio               String?
+  ddd1                    String?
+  telefone1               String?
+  ddd2                    String?
+  telefone2               String?
+  ddd_fax                 String?
+  fax                     String?
+  correio_eletronico      String?
+  situacao_especial       String?
+  data_situacao_especial  String?
+  cnpj                    String?
+
+  @@id([cnpj_basico, cnpj_ordem, cnpj_dv])
+  @@map("estabelecimento") // <--- ADICIONE ESTA LINHA
+
+}
+
+model Simples {
+  cnpj_basico        String  @id
+  opcao_simples      String?
+  data_opcao_simples String?
+  data_exclusao_simples String?
+  opcao_mei          String?
+  data_opcao_mei     String?
+  data_exclusao_mei  String?
+
+  @@index([cnpj_basico], name: "idx_simples_cnpj_basico")
+  @@map("simples")
+}
+
+model Socio {
+  cnpj                        String
+  cnpj_basico                 String
+  identificador_de_socio      String
+  nome_socio                  String?
+  cnpj_cpf_socio              String?
+  qualificacao_socio          String?
+  data_entrada_sociedade      String?
+  pais                        String?
+  representante_legal         String?
+  nome_representante          String?
+  qualificacao_representante_legal String?
+  faixa_etaria                String?
+
+  @@id([cnpj, cnpj_basico, identificador_de_socio])
+  @@map("socios")
+}
+
+model Referencia {
+  referencia String @id
+  valor      String?
+
+  @@map("_referencia")
+}
