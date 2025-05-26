@@ -34,7 +34,6 @@ Tecnologias principais:
 ---
 
 <pre lang="markdown">
-```txt
 📂 neurocloser/
 ├── apps/                  # Aplicações executáveis
 │   ├── api/               # Backend com filtros de CNPJ e envio para CRM
@@ -58,7 +57,6 @@ Tecnologias principais:
 ├── tsconfig.base.json     # Configuração base TypeScript
 ├── .eslintrc.js           # Lint global
 └── .prettierrc            # Formatação de código
-```
 </pre>
 
 
