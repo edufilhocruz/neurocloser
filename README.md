@@ -33,9 +33,9 @@ Tecnologias principais:
 
 ---
 
-## 📂 Estrutura de Pastas
-
-neurocloser/
+<pre lang="markdown">
+```txt
+📂 neurocloser/
 ├── apps/                  # Aplicações executáveis
 │   ├── api/               # Backend com filtros de CNPJ e envio para CRM
 │   ├── web/               # Frontend em Next.js
@@ -58,6 +58,9 @@ neurocloser/
 ├── tsconfig.base.json     # Configuração base TypeScript
 ├── .eslintrc.js           # Lint global
 └── .prettierrc            # Formatação de código
+```
+</pre>
+
 
 ## 🚀 Funcionalidades 
 
