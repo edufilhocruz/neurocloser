@@ -1,0 +1,39 @@
+# neurocloser/backend/gqlgen.yml
+schema:
+  - graphql/schema.graphqls
+
+exec:
+  filename: graphql/generated/generated.go
+  package: generated
+
+model:
+  filename: graphql/model/models_gen.go
+  package: model
+
+# Esta seção é CRÍTICA. Assegure-se de que ela está exatamente assim,
+# incluindo a indentação e os caminhos completos para os tipos do gqlgen.
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.ID
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+  Float:
+    model:
+      - github.com/99designs/gqlgen/graphql.Float
+  Boolean:
+    model:
+      - github.com/99designs/gqlgen/graphql.Boolean # <-- O tipo que está causando o erro agora
+  String:
+    model:
+      - github.com/99designs/gqlgen/graphql.String
+
+autobind:
+  - github.com/edufilhocruz/neurocloser/backend/models
+
+resolver:
+  layout: follow-schema
+  dir: graphql
+  package: graphql

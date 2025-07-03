@@ -1,0 +1,136 @@
+# Tipos de dados (equivalente aos nossos Go Models)
+
+type Empresa {
+  cnpjBasico: String!
+  razaoSocial: String!
+  naturezaJuridica: String!
+  qualificacaoResponsavel: String!
+  porteEmpresa: String!
+  enteFederativoResponsavel: String!
+  capitalSocial: Float!
+}
+
+type Estabelecimento {
+  id: Int!
+  cnpj: String! # CNPJ completo
+  cnpjBasico: String!
+  cnpjOrdem: String!
+  cnpjDv: String!
+  matrizFilial: String!
+  nomeFantasia: String
+  situacaoCadastral: String! # Situação Cadastral
+  dataSituacaoCadastral: String!
+  motivoSituacaoCadastral: String
+  nomeCidadeExterior: String
+  pais: String
+  dataInicioAtividades: String!
+  cnaeFiscal: String! # Código CNAE Fiscal Principal (será um código, precisamos buscar a descrição)
+  cnaeFiscalSecundaria: String # Códigos CNAE Fiscal Secundário (serão códigos)
+  tipoLogradouro: String!
+  logradouro: String!
+  numero: String!
+  complemento: String
+  bairro: String
+  cep: String!
+  uf: String! # Estado
+  municipio: String!
+  ddd1: String
+  telefone1: String
+  ddd2: String
+  telefone2: String
+  dddFax: String
+  fax: String
+  correioEletronico: String
+  situacaoEspecial: String
+  dataSituacaoEspecial: String
+}
+
+type Simples {
+  cnpjBasico: String!
+  opcaoSimples: String!
+  dataOpcaoSimples: String
+  dataExclusaoSimples: String
+  opcaoMEI: String!
+  dataOpcaoMEI: String
+  dataExclusaoMEI: String
+}
+
+type Socio {
+  cnpj: String! # CNPJ da empresa associada
+  cnpjBasico: String! # CNPJ Básico da empresa associada
+  identificadorDeSocio: String!
+  nomeSocio: String! # Nome do Sócio
+  cnpjCpfSocio: String!
+  qualificacaoSocio: String!
+  dataEntradaSociedade: String!
+  pais: String
+  representanteLegal: String
+  nomeRepresentante: String
+  qualificacaoRepresentanteLegal: String
+  faixaEtaria: String
+}
+
+type CNAE { # Tipo para CNAE
+  codigo: String!
+  descricao: String!
+}
+
+# TIPO COMBINADO: ProspeccaoDetalhada
+# Este tipo é apenas para o GraphQL, para agrupar resultados de várias tabelas.
+type ProspeccaoDetalhada {
+    empresa: Empresa!
+    estabelecimento: Estabelecimento!
+    socios: [Socio!]! # Uma lista de sócios
+    cnaeFiscal: CNAE # CNAE Fiscal Principal (com descrição)
+    cnaeSecundaria: [CNAE!]! # CNAEs Secundários (com descrições)
+}
+
+# INPUT para filtros de prospecção
+input ProspeccaoFilter {
+    cnpj: String
+    razaoSocial: String
+    nomeFantasia: String
+    uf: String
+    situacaoCadastral: String
+    porteEmpresa: String
+    cnaeFiscal: String
+    cnaeFiscalSecundaria: String # Mantido como String para busca parcial (LIKE '%codigo%')
+    minCapitalSocial: Float
+    maxCapitalSocial: Float
+    # REMOVIDOS AQUI: 'limite' e 'offset' para serem argumentos diretos da query
+}
+
+# Queries (operações de leitura)
+type Query {
+  # Adicionado 'offset' para paginação na query 'empresas'
+  empresas(limit: Int, offset: Int): [Empresa!]!
+  empresa(cnpjBasico: String!): Empresa
+  estabelecimento(id: Int!): Estabelecimento
+  
+  # Queries diretas para entidades (útil para granularidade, mas o resolver precisa existir)
+  sociosByCnpjBasico(cnpjBasico: String!): [Socio!]!
+  cnaeByCodigo(codigo: String!): CNAE
+  
+  # Query principal para prospecção, agora com paginação
+  buscarProspeccao(filter: ProspeccaoFilter, limit: Int, offset: Int): [ProspeccaoDetalhada!]! # <--- MUDANÇA: limit e offset como argumentos diretos
+}
+
+
+# Mutations (operações de escrita - CREATE, UPDATE, DELETE)
+# Por enquanto, este bloco está comentado.
+# type Mutation {
+#   # createEmpresa(input: CreateEmpresaInput!): Empresa!
+#   # updateEmpresa(id: Int!, input: UpdateEmpresaInput!): Empresa!
+#   # deleteEmpresa(id: Int!): Boolean!
+# }
+
+# Inputs para mutations (se fossemos criar)
+# input CreateEmpresaInput {
+#   razaoSocial: String!
+#   # ... outros campos
+# }
+
+# input UpdateEmpresaInput {
+#   razaoSocial: String
+#   # ... outros campos que podem ser opcionais
+# }

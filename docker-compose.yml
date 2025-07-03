@@ -1,0 +1,27 @@
+# neurocloser/docker-compose.yml
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+    # Adicione esta linha para carregar explicitamente o arquivo .env
+    env_file:
+      - ./.env
+    networks:
+      - neurocloser_network
+
+    restart: on-failure
+    # healthcheck: (mantido comentado)
+    #   test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+
+networks:
+  neurocloser_network:
+    driver: bridge
