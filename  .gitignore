@@ -1,0 +1,75 @@
+# === BACKEND - Golang ===
+# Executáveis
+*.exe
+*.out
+*.test
+
+# Diretórios e binários de build
+/build
+/bin
+/dist
+
+# Arquivos temporários
+*.log
+*.tmp
+
+# Módulos (caso use vendoring)
+vendor/
+
+# Configs e envs
+.env
+.env.*
+
+# === FRONTEND - React / Next.js ===
+# Build e dependências
+node_modules/
+.next/
+out/
+.cache/
+dist/
+build/
+
+# Arquivos de lock
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Arquivos de ambiente
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# === COMUM (Frontend + Backend) ===
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs e editores
+.idea/
+.vscode/
+*.swp
+
+# Arquivos de testes e cobertura
+coverage/
+*.lcov
+
+# Arquivos temporários
+*.bak
+*.old
+*.orig
+*~
+
+# Arquivos de dump de crash
+*.log
+*.pid
+*.seed
+
+# Arquivos de configuração pessoais
+*.sublime-workspace
+*.sublime-project

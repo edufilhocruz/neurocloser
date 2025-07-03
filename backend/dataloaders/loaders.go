@@ -2,7 +2,6 @@ package dataloaders
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -52,7 +51,9 @@ func NewLoaders(empresaRepo repositories.EmpresaRepository,
 			if emp, ok := empresaMap[key.String()]; ok {
 				results[i] = &dataloader.Result{Data: emp}
 			} else {
-				results[i] = &dataloader.Result{Error: fmt.Errorf("empresa com CNPJ Básico %s não encontrada", key.String())}
+				// Se não encontrar, não é um erro, apenas um resultado nulo.
+				// O GraphQL tratará isso como 'null'.
+				results[i] = &dataloader.Result{Data: nil}
 			}
 		}
 		return results
@@ -105,7 +106,8 @@ func NewLoaders(empresaRepo repositories.EmpresaRepository,
 			if c, ok := cnaeMap[key.String()]; ok {
 				results[i] = &dataloader.Result{Data: c}
 			} else {
-				results[i] = &dataloader.Result{Error: fmt.Errorf("CNAE com código %s não encontrado", key.String())}
+				// Se não encontrar, não é um erro, apenas um resultado nulo.
+				results[i] = &dataloader.Result{Data: nil}
 			}
 		}
 		return results
