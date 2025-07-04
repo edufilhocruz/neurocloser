@@ -1,9 +1,10 @@
-module github.com/edufilhocruz/neurocloser/backend
+module backend
 
 go 1.24.2
 
 require (
 	github.com/99designs/gqlgen v0.17.76
+	github.com/edufilhocruz/neurocloser/backend v0.0.0-20250703195627-1ed8b7911388
 	github.com/graph-gophers/dataloader v5.0.0+incompatible
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9

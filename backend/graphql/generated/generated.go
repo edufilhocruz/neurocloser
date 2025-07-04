@@ -3,6 +3,7 @@
 package generated
 
 import (
+	"backend/graphql/model"
 	"bytes"
 	"context"
 	"errors"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/edufilhocruz/neurocloser/backend/graphql/model"
 	"github.com/edufilhocruz/neurocloser/backend/models"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -39,6 +39,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Estabelecimento() EstabelecimentoResolver
 	Query() QueryResolver
 }
 
@@ -70,6 +71,7 @@ type ComplexityRoot struct {
 		CNPJBasico              func(childComplexity int) int
 		CNPJDV                  func(childComplexity int) int
 		CNPJOrdem               func(childComplexity int) int
+		CnpjFormatado           func(childComplexity int) int
 		Complemento             func(childComplexity int) int
 		CorreioEletronico       func(childComplexity int) int
 		DDD1                    func(childComplexity int) int
@@ -139,6 +141,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type EstabelecimentoResolver interface {
+	CnpjFormatado(ctx context.Context, obj *models.Estabelecimento) (string, error)
+}
 type QueryResolver interface {
 	Empresas(ctx context.Context, limit *int, offset *int) ([]*models.Empresa, error)
 	Empresa(ctx context.Context, cnpjBasico string) (*models.Empresa, error)
@@ -285,6 +290,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Estabelecimento.CNPJOrdem(childComplexity), true
+
+	case "Estabelecimento.cnpjFormatado":
+		if e.complexity.Estabelecimento.CnpjFormatado == nil {
+			break
+		}
+
+		return e.complexity.Estabelecimento.CnpjFormatado(childComplexity), true
 
 	case "Estabelecimento.complemento":
 		if e.complexity.Estabelecimento.Complemento == nil {
@@ -799,7 +811,8 @@ type Empresa {
 
 type Estabelecimento {
   id: Int!
-  cnpj: String! # CNPJ completo
+  cnpj: String! # CNPJ bruto (sem formatação)
+  cnpjFormatado: String! # NOVO: CNPJ formatado (XX.XXX.XXX/XXXX-XX)
   cnpjBasico: String!
   cnpjOrdem: String!
   cnpjDv: String!
@@ -872,19 +885,24 @@ type ProspeccaoDetalhada {
     cnaeSecundaria: [CNAE!]! # CNAEs Secundários (com descrições)
 }
 
-# INPUT para filtros de prospecção
+# INPUT para filtros de prospecção (AGORA COMPLETO)
 input ProspeccaoFilter {
-    cnpj: String
-    razaoSocial: String
-    nomeFantasia: String
-    uf: String
-    situacaoCadastral: String
-    porteEmpresa: String
-    cnaeFiscal: String
-    cnaeFiscalSecundaria: String # Mantido como String para busca parcial (LIKE '%codigo%')
+    cnpj: String # CNPJ completo (para busca exata)
+    razaoSocial: String # Parte da razão social (para busca parcial)
+    nomeFantasia: String # Parte do nome fantasia (para busca parcial)
+    uf: String # UF do estabelecimento
+    municipio: String # Município do estabelecimento (busca exata)
+    situacaoCadastral: String # Situação cadastral do estabelecimento
+    dataSituacaoCadastralMin: String # Data mínima da situação cadastral (YYYY-MM-DD)
+    dataSituacaoCadastralMax: String # Data máxima da situação cadastral (YYYY-MM-DD)
+    porteEmpresa: String # Porte da empresa
+    naturezaJuridica: String # Natureza Jurídica da empresa
+    cnaeFiscal: String # Código CNAE Fiscal principal
+    cnaeFiscalSecundaria: String # Código CNAE Fiscal secundário (busca parcial em string)
     minCapitalSocial: Float
     maxCapitalSocial: Float
-    # REMOVIDOS AQUI: 'limite' e 'offset' para serem argumentos diretos da query
+    dataInicioAtividadesMin: String # Data mínima de início de atividades (YYYY-MM-DD)
+    dataInicioAtividadesMax: String # Data máxima de início de atividades (YYYY-MM-DD)
 }
 
 # Queries (operações de leitura)
@@ -898,8 +916,8 @@ type Query {
   sociosByCnpjBasico(cnpjBasico: String!): [Socio!]!
   cnaeByCodigo(codigo: String!): CNAE
   
-  # Query principal para prospecção, agora com paginação
-  buscarProspeccao(filter: ProspeccaoFilter, limit: Int, offset: Int): [ProspeccaoDetalhada!]! # <--- MUDANÇA: limit e offset como argumentos diretos
+  # Query principal para prospecção, agora com todos os filtros e paginação
+  buscarProspeccao(filter: ProspeccaoFilter, limit: Int, offset: Int): [ProspeccaoDetalhada!]!
 }
 
 
@@ -987,7 +1005,7 @@ func (ec *executionContext) field_Query_buscarProspeccao_argsFilter(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
 	if tmp, ok := rawArgs["filter"]; ok {
-		return ec.unmarshalOProspeccaoFilter2ᚖgithubᚗcomᚋedufilhocruzᚋneurocloserᚋbackendᚋgraphqlᚋmodelᚐProspeccaoFilter(ctx, tmp)
+		return ec.unmarshalOProspeccaoFilter2ᚖbackendᚋgraphqlᚋmodelᚐProspeccaoFilter(ctx, tmp)
 	}
 
 	var zeroVal *model.ProspeccaoFilter
@@ -1790,6 +1808,50 @@ func (ec *executionContext) fieldContext_Estabelecimento_cnpj(_ context.Context,
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Estabelecimento_cnpjFormatado(ctx context.Context, field graphql.CollectedField, obj *models.Estabelecimento) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Estabelecimento_cnpjFormatado(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Estabelecimento().CnpjFormatado(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Estabelecimento_cnpjFormatado(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Estabelecimento",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
@@ -3172,6 +3234,8 @@ func (ec *executionContext) fieldContext_ProspeccaoDetalhada_estabelecimento(_ c
 				return ec.fieldContext_Estabelecimento_id(ctx, field)
 			case "cnpj":
 				return ec.fieldContext_Estabelecimento_cnpj(ctx, field)
+			case "cnpjFormatado":
+				return ec.fieldContext_Estabelecimento_cnpjFormatado(ctx, field)
 			case "cnpjBasico":
 				return ec.fieldContext_Estabelecimento_cnpjBasico(ctx, field)
 			case "cnpjOrdem":
@@ -3585,6 +3649,8 @@ func (ec *executionContext) fieldContext_Query_estabelecimento(ctx context.Conte
 				return ec.fieldContext_Estabelecimento_id(ctx, field)
 			case "cnpj":
 				return ec.fieldContext_Estabelecimento_cnpj(ctx, field)
+			case "cnpjFormatado":
+				return ec.fieldContext_Estabelecimento_cnpjFormatado(ctx, field)
 			case "cnpjBasico":
 				return ec.fieldContext_Estabelecimento_cnpjBasico(ctx, field)
 			case "cnpjOrdem":
@@ -6767,7 +6833,7 @@ func (ec *executionContext) unmarshalInputProspeccaoFilter(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"cnpj", "razaoSocial", "nomeFantasia", "uf", "situacaoCadastral", "porteEmpresa", "cnaeFiscal", "cnaeFiscalSecundaria", "minCapitalSocial", "maxCapitalSocial"}
+	fieldsInOrder := [...]string{"cnpj", "razaoSocial", "nomeFantasia", "uf", "municipio", "situacaoCadastral", "dataSituacaoCadastralMin", "dataSituacaoCadastralMax", "porteEmpresa", "naturezaJuridica", "cnaeFiscal", "cnaeFiscalSecundaria", "minCapitalSocial", "maxCapitalSocial", "dataInicioAtividadesMin", "dataInicioAtividadesMax"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6802,6 +6868,13 @@ func (ec *executionContext) unmarshalInputProspeccaoFilter(ctx context.Context, 
 				return it, err
 			}
 			it.Uf = data
+		case "municipio":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("municipio"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Municipio = data
 		case "situacaoCadastral":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("situacaoCadastral"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
@@ -6809,6 +6882,20 @@ func (ec *executionContext) unmarshalInputProspeccaoFilter(ctx context.Context, 
 				return it, err
 			}
 			it.SituacaoCadastral = data
+		case "dataSituacaoCadastralMin":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dataSituacaoCadastralMin"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DataSituacaoCadastralMin = data
+		case "dataSituacaoCadastralMax":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dataSituacaoCadastralMax"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DataSituacaoCadastralMax = data
 		case "porteEmpresa":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("porteEmpresa"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
@@ -6816,6 +6903,13 @@ func (ec *executionContext) unmarshalInputProspeccaoFilter(ctx context.Context, 
 				return it, err
 			}
 			it.PorteEmpresa = data
+		case "naturezaJuridica":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("naturezaJuridica"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NaturezaJuridica = data
 		case "cnaeFiscal":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("cnaeFiscal"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
@@ -6844,6 +6938,20 @@ func (ec *executionContext) unmarshalInputProspeccaoFilter(ctx context.Context, 
 				return it, err
 			}
 			it.MaxCapitalSocial = data
+		case "dataInicioAtividadesMin":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dataInicioAtividadesMin"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DataInicioAtividadesMin = data
+		case "dataInicioAtividadesMax":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dataInicioAtividadesMax"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DataInicioAtividadesMax = data
 		}
 	}
 
@@ -6985,44 +7093,80 @@ func (ec *executionContext) _Estabelecimento(ctx context.Context, sel ast.Select
 		case "id":
 			out.Values[i] = ec._Estabelecimento_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "cnpj":
 			out.Values[i] = ec._Estabelecimento_cnpj(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "cnpjFormatado":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Estabelecimento_cnpjFormatado(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "cnpjBasico":
 			out.Values[i] = ec._Estabelecimento_cnpjBasico(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "cnpjOrdem":
 			out.Values[i] = ec._Estabelecimento_cnpjOrdem(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "cnpjDv":
 			out.Values[i] = ec._Estabelecimento_cnpjDv(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "matrizFilial":
 			out.Values[i] = ec._Estabelecimento_matrizFilial(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "nomeFantasia":
 			out.Values[i] = ec._Estabelecimento_nomeFantasia(ctx, field, obj)
 		case "situacaoCadastral":
 			out.Values[i] = ec._Estabelecimento_situacaoCadastral(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "dataSituacaoCadastral":
 			out.Values[i] = ec._Estabelecimento_dataSituacaoCadastral(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "motivoSituacaoCadastral":
 			out.Values[i] = ec._Estabelecimento_motivoSituacaoCadastral(ctx, field, obj)
@@ -7033,29 +7177,29 @@ func (ec *executionContext) _Estabelecimento(ctx context.Context, sel ast.Select
 		case "dataInicioAtividades":
 			out.Values[i] = ec._Estabelecimento_dataInicioAtividades(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "cnaeFiscal":
 			out.Values[i] = ec._Estabelecimento_cnaeFiscal(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "cnaeFiscalSecundaria":
 			out.Values[i] = ec._Estabelecimento_cnaeFiscalSecundaria(ctx, field, obj)
 		case "tipoLogradouro":
 			out.Values[i] = ec._Estabelecimento_tipoLogradouro(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "logradouro":
 			out.Values[i] = ec._Estabelecimento_logradouro(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "numero":
 			out.Values[i] = ec._Estabelecimento_numero(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "complemento":
 			out.Values[i] = ec._Estabelecimento_complemento(ctx, field, obj)
@@ -7064,17 +7208,17 @@ func (ec *executionContext) _Estabelecimento(ctx context.Context, sel ast.Select
 		case "cep":
 			out.Values[i] = ec._Estabelecimento_cep(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "uf":
 			out.Values[i] = ec._Estabelecimento_uf(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "municipio":
 			out.Values[i] = ec._Estabelecimento_municipio(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "ddd1":
 			out.Values[i] = ec._Estabelecimento_ddd1(ctx, field, obj)
@@ -8447,7 +8591,7 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) unmarshalOProspeccaoFilter2ᚖgithubᚗcomᚋedufilhocruzᚋneurocloserᚋbackendᚋgraphqlᚋmodelᚐProspeccaoFilter(ctx context.Context, v any) (*model.ProspeccaoFilter, error) {
+func (ec *executionContext) unmarshalOProspeccaoFilter2ᚖbackendᚋgraphqlᚋmodelᚐProspeccaoFilter(ctx context.Context, v any) (*model.ProspeccaoFilter, error) {
 	if v == nil {
 		return nil, nil
 	}

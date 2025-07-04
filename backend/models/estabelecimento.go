@@ -1,36 +1,48 @@
 package models
 
+import "fmt" // Importar fmt para a função de formatação de CNPJ
 type Estabelecimento struct {
-	ID                      int    `json:"id" db:"id"`                                               // "id","integer" [cite: 1]
-	CNPJ                    string `json:"cnpj" db:"cnpj"`                                           // "cnpj","text" [cite: 1]
-	CNPJBasico              string `json:"cnpj_basico" db:"cnpj_basico"`                             // "cnpj_basico","text" [cite: 1]
-	CNPJOrdem               string `json:"cnpj_ordem" db:"cnpj_ordem"`                               // "cnpj_ordem","text" [cite: 1]
-	CNPJDV                  string `json:"cnpj_dv" db:"cnpj_dv"`                                     // "cnpj_dv","text" [cite: 1]
-	MatrizFilial            string `json:"matriz_filial" db:"matriz_filial"`                         // "matriz_filial","text" [cite: 1]
-	NomeFantasia            string `json:"nome_fantasia" db:"nome_fantasia"`                         // "nome_fantasia","text" [cite: 1]
-	SituacaoCadastral       string `json:"situacao_cadastral" db:"situacao_cadastral"`               // "situacao_cadastral","text" [cite: 1]
-	DataSituacaoCadastral   string `json:"data_situacao_cadastral" db:"data_situacao_cadastral"`     // "data_situacao_cadastral","text" [cite: 1]
-	MotivoSituacaoCadastral string `json:"motivo_situacao_cadastral" db:"motivo_situacao_cadastral"` // "motivo_situacao_cadastral","text" [cite: 1]
-	NomeCidadeExterior      string `json:"nome_cidade_exterior" db:"nome_cidade_exterior"`           // "nome_cidade_exterior","text" [cite: 1]
-	Pais                    string `json:"pais" db:"pais"`                                           // "pais","text" [cite: 1]
-	DataInicioAtividades    string `json:"data_inicio_atividades" db:"data_inicio_atividades"`       // "data_inicio_atividades","text" [cite: 1]
-	CNAEFiscal              string `json:"cnae_fiscal" db:"cnae_fiscal"`                             // "cnae_fiscal","text" [cite: 1]
-	CNAEFiscalSecundaria    string `json:"cnae_fiscal_secundaria" db:"cnae_fiscal_secundaria"`       // "cnae_fiscal_secundaria","text" [cite: 1]
-	TipoLogradouro          string `json:"tipo_logradouro" db:"tipo_logradouro"`                     // "tipo_logradouro","text" [cite: 1]
-	Logradouro              string `json:"logradouro" db:"logradouro"`                               // "logradouro","text" [cite: 1]
-	Numero                  string `json:"numero" db:"numero"`                                       // "numero","text" [cite: 1]
-	Complemento             string `json:"complemento" db:"complemento"`                             // "complemento","text" [cite: 1]
-	Bairro                  string `json:"bairro" db:"bairro"`                                       // "bairro","text" [cite: 1]
-	CEP                     string `json:"cep" db:"cep"`                                             // "cep","text" [cite: 1]
-	UF                      string `json:"uf" db:"uf"`                                               // "uf","text" [cite: 1]
-	Municipio               string `json:"municipio" db:"municipio"`                                 // "municipio","text" [cite: 1]
-	DDD1                    string `json:"ddd1" db:"ddd1"`                                           // "ddd1","text" [cite: 1]
-	Telefone1               string `json:"telefone1" db:"telefone1"`                                 // "telefone1","text" [cite: 1]
-	DDD2                    string `json:"ddd2" db:"ddd2"`                                           // "ddd2","text" [cite: 1]
-	Telefone2               string `json:"telefone2" db:"telefone2"`                                 // "telefone2","text" [cite: 1]
-	DDDFax                  string `json:"ddd_fax" db:"ddd_fax"`                                     // "ddd_fax","text" [cite: 1]
-	Fax                     string `json:"fax" db:"fax"`                                             // "fax","text" [cite: 1]
-	CorreioEletronico       string `json:"correio_eletronico" db:"correio_eletronico"`               // "correio_eletronico","text" [cite: 1]
-	SituacaoEspecial        string `json:"situacao_especial" db:"situacao_especial"`                 // "situacao_especial","text" [cite: 1]
-	DataSituacaoEspecial    string `json:"data_situacao_especial" db:"data_situacao_especial"`       // "data_situacao_especial","text" [cite: 1]
+	ID                      int    `json:"id" db:"id"`
+	CNPJ                    string `json:"cnpj" db:"cnpj"`       // CNPJ bruto (sem formatação)
+	CNPJFormatado           string `json:"cnpjFormatado" db:"-"` // NOVO: CNPJ formatado, não vindo diretamente do DB
+	CNPJBasico              string `json:"cnpj_basico" db:"cnpj_basico"`
+	CNPJOrdem               string `json:"cnpj_ordem" db:"cnpj_ordem"`
+	CNPJDV                  string `json:"cnpj_dv" db:"cnpj_dv"`
+	MatrizFilial            string `json:"matriz_filial" db:"matriz_filial"`
+	NomeFantasia            string `json:"nome_fantasia" db:"nome_fantasia"`
+	SituacaoCadastral       string `json:"situacao_cadastral" db:"situacao_cadastral"`
+	DataSituacaoCadastral   string `json:"data_situacao_cadastral" db:"data_situacao_cadastral"`
+	MotivoSituacaoCadastral string `json:"motivo_situacao_cadastral" db:"motivo_situacao_cadastral"`
+	NomeCidadeExterior      string `json:"nome_cidade_exterior" db:"nome_cidade_exterior"`
+	Pais                    string `json:"pais" db:"pais"`
+	DataInicioAtividades    string `json:"data_inicio_atividades" db:"data_inicio_atividades"`
+	CNAEFiscal              string `json:"cnae_fiscal" db:"cnae_fiscal"`
+	CNAEFiscalSecundaria    string `json:"cnae_fiscal_secundaria" db:"cnae_fiscal_secundaria"`
+	TipoLogradouro          string `json:"tipo_logradouro" db:"tipo_logradouro"`
+	Logradouro              string `json:"logradouro" db:"logradouro"`
+	Numero                  string `json:"numero" db:"numero"`
+	Complemento             string `json:"complemento" db:"complemento"`
+	Bairro                  string `json:"bairro" db:"bairro"`
+	CEP                     string `json:"cep" db:"cep"`
+	UF                      string `json:"uf" db:"uf"`
+	Municipio               string `json:"municipio" db:"municipio"`
+	DDD1                    string `json:"ddd1" db:"ddd1"`
+	Telefone1               string `json:"telefone1" db:"telefone1"`
+	DDD2                    string `json:"ddd2" db:"ddd2"`
+	Telefone2               string `json:"telefone2" db:"telefone2"`
+	DDDFax                  string `json:"ddd_fax" db:"ddd_fax"`
+	Fax                     string `json:"fax" db:"fax"`
+	CorreioEletronico       string `json:"correio_eletronico" db:"correio_eletronico"`
+	SituacaoEspecial        string `json:"situacao_especial" db:"situacao_especial"`
+	DataSituacaoEspecial    string `json:"data_situacao_especial" db:"data_situacao_especial"`
+}
+
+// FormatCNPJ formata o CNPJ do estabelecimento no formato "XX.XXX.XXX/XXXX-XX".
+func (e *Estabelecimento) FormatCNPJ() {
+	cnpj := e.CNPJ
+	if len(cnpj) != 14 {
+		e.CNPJFormatado = cnpj // Se não tiver 14 dígitos, usa o CNPJ bruto
+		return
+	}
+	e.CNPJFormatado = fmt.Sprintf("%s.%s.%s/%s-%s", cnpj[0:2], cnpj[2:5], cnpj[5:8], cnpj[8:12], cnpj[12:14])
 }

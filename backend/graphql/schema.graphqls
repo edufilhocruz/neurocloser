@@ -12,7 +12,8 @@ type Empresa {
 
 type Estabelecimento {
   id: Int!
-  cnpj: String! # CNPJ completo
+  cnpj: String! # CNPJ bruto (sem formatação)
+  cnpjFormatado: String! # NOVO: CNPJ formatado (XX.XXX.XXX/XXXX-XX)
   cnpjBasico: String!
   cnpjOrdem: String!
   cnpjDv: String!
@@ -85,19 +86,24 @@ type ProspeccaoDetalhada {
     cnaeSecundaria: [CNAE!]! # CNAEs Secundários (com descrições)
 }
 
-# INPUT para filtros de prospecção
+# INPUT para filtros de prospecção (AGORA COMPLETO)
 input ProspeccaoFilter {
-    cnpj: String
-    razaoSocial: String
-    nomeFantasia: String
-    uf: String
-    situacaoCadastral: String
-    porteEmpresa: String
-    cnaeFiscal: String
-    cnaeFiscalSecundaria: String # Mantido como String para busca parcial (LIKE '%codigo%')
+    cnpj: String # CNPJ completo (para busca exata)
+    razaoSocial: String # Parte da razão social (para busca parcial)
+    nomeFantasia: String # Parte do nome fantasia (para busca parcial)
+    uf: String # UF do estabelecimento
+    municipio: String # Município do estabelecimento (busca exata)
+    situacaoCadastral: String # Situação cadastral do estabelecimento
+    dataSituacaoCadastralMin: String # Data mínima da situação cadastral (YYYY-MM-DD)
+    dataSituacaoCadastralMax: String # Data máxima da situação cadastral (YYYY-MM-DD)
+    porteEmpresa: String # Porte da empresa
+    naturezaJuridica: String # Natureza Jurídica da empresa
+    cnaeFiscal: String # Código CNAE Fiscal principal
+    cnaeFiscalSecundaria: String # Código CNAE Fiscal secundário (busca parcial em string)
     minCapitalSocial: Float
     maxCapitalSocial: Float
-    # REMOVIDOS AQUI: 'limite' e 'offset' para serem argumentos diretos da query
+    dataInicioAtividadesMin: String # Data mínima de início de atividades (YYYY-MM-DD)
+    dataInicioAtividadesMax: String # Data máxima de início de atividades (YYYY-MM-DD)
 }
 
 # Queries (operações de leitura)
@@ -111,8 +117,8 @@ type Query {
   sociosByCnpjBasico(cnpjBasico: String!): [Socio!]!
   cnaeByCodigo(codigo: String!): CNAE
   
-  # Query principal para prospecção, agora com paginação
-  buscarProspeccao(filter: ProspeccaoFilter, limit: Int, offset: Int): [ProspeccaoDetalhada!]! # <--- MUDANÇA: limit e offset como argumentos diretos
+  # Query principal para prospecção, agora com todos os filtros e paginação
+  buscarProspeccao(filter: ProspeccaoFilter, limit: Int, offset: Int): [ProspeccaoDetalhada!]!
 }
 
 

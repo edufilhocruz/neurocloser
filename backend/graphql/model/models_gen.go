@@ -3,16 +3,22 @@
 package model
 
 type ProspeccaoFilter struct {
-	Cnpj                 *string  `json:"cnpj,omitempty"`
-	RazaoSocial          *string  `json:"razaoSocial,omitempty"`
-	NomeFantasia         *string  `json:"nomeFantasia,omitempty"`
-	Uf                   *string  `json:"uf,omitempty"`
-	SituacaoCadastral    *string  `json:"situacaoCadastral,omitempty"`
-	PorteEmpresa         *string  `json:"porteEmpresa,omitempty"`
-	CnaeFiscal           *string  `json:"cnaeFiscal,omitempty"`
-	CnaeFiscalSecundaria *string  `json:"cnaeFiscalSecundaria,omitempty"`
-	MinCapitalSocial     *float64 `json:"minCapitalSocial,omitempty"`
-	MaxCapitalSocial     *float64 `json:"maxCapitalSocial,omitempty"`
+	Cnpj                     *string  `json:"cnpj,omitempty"`
+	RazaoSocial              *string  `json:"razaoSocial,omitempty"`
+	NomeFantasia             *string  `json:"nomeFantasia,omitempty"`
+	Uf                       *string  `json:"uf,omitempty"`
+	Municipio                *string  `json:"municipio,omitempty"`
+	SituacaoCadastral        *string  `json:"situacaoCadastral,omitempty"`
+	DataSituacaoCadastralMin *string  `json:"dataSituacaoCadastralMin,omitempty"`
+	DataSituacaoCadastralMax *string  `json:"dataSituacaoCadastralMax,omitempty"`
+	PorteEmpresa             *string  `json:"porteEmpresa,omitempty"`
+	NaturezaJuridica         *string  `json:"naturezaJuridica,omitempty"`
+	CnaeFiscal               *string  `json:"cnaeFiscal,omitempty"`
+	CnaeFiscalSecundaria     *string  `json:"cnaeFiscalSecundaria,omitempty"`
+	MinCapitalSocial         *float64 `json:"minCapitalSocial,omitempty"`
+	MaxCapitalSocial         *float64 `json:"maxCapitalSocial,omitempty"`
+	DataInicioAtividadesMin  *string  `json:"dataInicioAtividadesMin,omitempty"`
+	DataInicioAtividadesMax  *string  `json:"dataInicioAtividadesMax,omitempty"`
 }
 
 type Query struct {
